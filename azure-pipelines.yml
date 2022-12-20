@@ -10,15 +10,15 @@ jobs:
   - job: test
     displayName: Test the World Cup countdown script
     steps:
-      # Test the script
+      # Run the script
       - script: |
           # Set up the Python virtual environment
-          python3 -m venv env
-          source env/bin/activate
+          #python3 -m venv env
+          #source env/bin/activate
 
           # Run the test script
-          /home/zingaya/worldcup2026/worldcup2026countdown.py
-        name: Test_the_script
+          python3 /home/zingaya/worldcup2026/worldcup2026countdown.py
+        name: Run_the_script
 
       # Send the pipeline status to Zabbix
       - script: |
