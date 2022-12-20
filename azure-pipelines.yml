@@ -21,7 +21,16 @@ jobs:
           lastid=$(echo "$list" | sort -k1,1n | tail -n1 | awk '{print $1}')
           nextid=$(($lastid+1))
           #echo "##vso[task.setvariable isOutput=true;variable=nextvmid;]$nextid" # Somehow is not saving the variable
-          echo $nextid > /tmp/nextid.out          
+          echo $nextid > /tmp/nextid.out  
+        name : A
+
+      # Run the script
+      - bash: |
+          nextid=$(cat /tmp/nextid.out)
+          # Create the container with the next available ID
+          pct create $nextid /var/lib/vz/template/cache/debian-10.0-standard_10.0-1_amd64.tar.gz --hostname=mycontainer --storage=large --net0 name=eth0,bridge=vmbr0,ip=dhcp --nameserver=8.8.8.8
+        dependsOn: A
+        name : B
 
   - job: create_lxc
     displayName: Create LXC in Proxmox
@@ -50,15 +59,16 @@ jobs:
       - bash: |
           nextid=$(cat /tmp/nextid.out)
           # Install dependencies
-          pct exec $nextid -- apt -y update
-          pct exec $nextid -- apt install -y python3-pip git
+          pct exec $nextid -- apt-get -y update
+          pct exec $nextid -- apt-get install -y python3-pip git
           pct exec $nextid -- pip3 install flask datetime
           
           # Clone Git repository
           pct exec $nextid -- git clone https://github.com/zingaya/worldcup2026.git
           
           # Make sure I have a path for executing Python
-          pct exec $nextid -- export PATH=$PATH:/usr/local/bin
+          pct exec $nextid -- export PATH=$PATH:/usr/local/bin          
+        retryCountOnTaskFailure: 2
         
   - job: run_worldcup2026countdown
     displayName: Run the WorldCup 2026 Countdown app
