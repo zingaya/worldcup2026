@@ -67,10 +67,10 @@ jobs:
     steps:
       # Run the script
       - bash: |
-          prodid=$(pct list | grep 'worldcup2026' | awk '{print $1}')
+          prodid=$(pct list | grep 'worldcup2026' | grep -v 'staging' | awk '{print $1}')
           stagingid=$(pct list | grep 'worldcup2026-staging' | awk '{print $1}')
-          pct set $prodid --hostname=worldcup2026-replaced
-          pct set $stagingid --hostname=worldcup2026        
+          pct set $prodid --hostname='worldcup2026-replaced'
+          pct set $stagingid --hostname='worldcup2026'      
           pct stop $prodid
           pct destroy $prodid
           pct set $stagingid --net0 name=eth0,bridge=vmbr0,ip=$(privateip)/24,gw=$(gateway)
@@ -80,7 +80,8 @@ jobs:
     dependsOn: 
       - run_lxc
       - prepare_lxc
-      - run_worldcup2026countdown      
+      - run_worldcup2026countdown   
+      - swap_staging
     condition: failed() # this job will only run if any of the other fails
     steps:
       # Run the script
