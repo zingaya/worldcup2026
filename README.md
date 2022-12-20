@@ -1,6 +1,18 @@
 # Countdown App
 
-This app displays a countdown to the next football World Cup in 2026.
+This app displays a countdown to the next football World Cup in 2026. This app is an example of how to monitor Github commits and Azure pipelines.
+
+## Requirements
+
+- Python 3
+- pip
+
+## Installation
+
+To install Python 3 and pip on a Debian machine, use the following commands:
+
+sudo apt-get update
+sudo apt-get install python3 python3-pip
 
 ## Features
 
