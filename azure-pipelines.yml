@@ -14,20 +14,19 @@ jobs:
     displayName: Find latest VMid in Proxmox
     steps:
       # Run the script
-      - script: |
+      - bash: |
           # Get the next available ID
           list=$(qm list; pct list)
           nextid=$(echo "$list" | sort -k1,1n | tail -n1 | awk '{print $1}')
           nextid=$(($nextid +1))
           echo "##vso[task.setvariable variable=nextvmid]$nextid"
-          echo $(nextvmid)
 
   - job: create_lxc
     displayName: Create LXC in Proxmox
     dependsOn: find_latest_vmid
     steps:
       # Run the script
-      - script: |
+      - bash: |
           # Create the container with the next available ID
           pct create $(nextvmid) /var/lib/vz/template/cache/debian-10.0-standard_10.0-1_amd64.tar.gz --hostname=mycontainer --storage=large --net0 name=eth0,bridge=vmbr0,ip=dhcp --nameserver=8.8.8.8
 
@@ -36,7 +35,7 @@ jobs:
     dependsOn: create_lxc
     steps:
       # Run the script
-      - script: |
+      - bash: |
           pct start $(nextvmid)
           
   - job: prepare_lxc
@@ -44,7 +43,7 @@ jobs:
     dependsOn: run_lxc
     steps:
       # Run the script
-      - script: |
+      - bash: |
           # Install dependencies
           pct exec $(nextvmid) -- apt -y update
           pct exec $(nextvmid) -- apt install -y python3-pip git
@@ -61,7 +60,7 @@ jobs:
     dependsOn: prepare_lxc
     steps:
       # Run the script
-      - script: |
+      - bash: |
           # Execute Python script
           pct exec $(nextvmid) -- nohup python3 worldcup2026/worldcup2026countdown.py &
         
