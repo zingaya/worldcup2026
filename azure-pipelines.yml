@@ -1,36 +1,22 @@
-trigger:
-  branches:
-    include:
-      - master
+# Configure the pipeline
+trigger: none
 
+# Specify the agent pool
 pool:
-  name: Self-Hosted
-  demands:
-    - agent.os -equals Debian
+  name: debian
 
-steps:
-  - script: |
-      # Install the necessary dependencies
-      apt-get update
-      apt-get install -y python3 python3-pip
-      
-      # Install the required Python packages
-      pip3 install flask
-      
-      # Build the Python script
-      python3 -m py_compile worldcup2026countdown.py
-    displayName: 'Build Python script'
+# Define the pipeline steps
+jobs:
+  - job: test
+    displayName: Test the World Cup countdown script
+    steps:
+      - script: |
+          # Set up the Python virtual environment
+          python -m venv env
+          source env/bin/activate
 
-  - task: CopyFiles@2
-    inputs:
-      SourceFolder: '$(System.DefaultWorkingDirectory)/'
-      TargetFolder: '/home/user/app'
-      OverWrite: true
-      CleanTargetFolder: true
-
-  - script: |
-      # Start the Flask app
-      cd /home/user/app
-      nohup python3 worldcup2026countdown.py &
-      disown
-    displayName: 'Start Flask app'
+          # Run the test script
+          python test.py
+        name: Test the script
+    agent:
+      name: gammez
