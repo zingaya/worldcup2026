@@ -8,7 +8,7 @@ pool:
 # Define the pipeline steps
 jobs:
   # Define a variable to be used on later steps
-    variables:
+  - variables:
       nextvmid: ''
     
   - job: find_latest_vmid
