@@ -19,8 +19,9 @@ jobs:
           # Get the last available VMid
           list=$(qm list; pct list)
           lastid=$(echo "$list" | sort -k1,1n | tail -n1 | awk '{print $1}')
-          lastid=$(($lastid+1))
-          echo "##vso[task.setvariable isOutput=true;variable=nextvmid;]$lastid"
+          nextid=$(($lastid+1))
+          #echo "##vso[task.setvariable isOutput=true;variable=nextvmid;]$nextid" # Somehow is not saving the variable
+          echo $nextid > nextid.out          
 
   - job: create_lxc
     displayName: Create LXC in Proxmox
@@ -28,8 +29,9 @@ jobs:
     steps:
       # Run the script
       - bash: |
+          nextid=$(cat nextid.out)
           # Create the container with the next available ID
-          pct create $(nextvmid) /var/lib/vz/template/cache/debian-10.0-standard_10.0-1_amd64.tar.gz --hostname=mycontainer --storage=large --net0 name=eth0,bridge=vmbr0,ip=dhcp --nameserver=8.8.8.8
+          pct create $nextid /var/lib/vz/template/cache/debian-10.0-standard_10.0-1_amd64.tar.gz --hostname=mycontainer --storage=large --net0 name=eth0,bridge=vmbr0,ip=dhcp --nameserver=8.8.8.8
 
   - job: run_lxc
     displayName: Run LXC in Proxmox
@@ -37,7 +39,8 @@ jobs:
     steps:
       # Run the script
       - bash: |
-          pct start $(nextvmid)
+          nextid=$(cat nextid.out)
+          pct start $nextid
           
   - job: prepare_lxc
     displayName: Install dependencies in the LXC
@@ -45,16 +48,17 @@ jobs:
     steps:
       # Run the script
       - bash: |
+          nextid=$(cat nextid.out)
           # Install dependencies
-          pct exec $(nextvmid) -- apt -y update
-          pct exec $(nextvmid) -- apt install -y python3-pip git
-          pct exec $(nextvmid) -- pip3 install flask datetime
+          pct exec $nextid -- apt -y update
+          pct exec $nextid -- apt install -y python3-pip git
+          pct exec $nextid -- pip3 install flask datetime
           
           # Clone Git repository
-          pct exec $(nextvmid) -- git clone https://github.com/zingaya/worldcup2026.git
+          pct exec $nextid -- git clone https://github.com/zingaya/worldcup2026.git
           
           # Make sure I have a path for executing Python
-          pct exec $(nextvmid) -- export PATH=$PATH:/usr/local/bin
+          pct exec $nextid -- export PATH=$PATH:/usr/local/bin
         
   - job: run_worldcup2026countdown
     displayName: Run the WorldCup 2026 Countdown app
@@ -62,8 +66,9 @@ jobs:
     steps:
       # Run the script
       - bash: |
+          nextid=$(cat nextid.out)
           # Execute Python script
-          pct exec $(nextvmid) -- nohup python3 worldcup2026/worldcup2026countdown.py &
+          pct exec $nextid -- nohup python3 worldcup2026/worldcup2026countdown.py &
         
 #      # Send the pipeline status to Zabbix
 #      - script: |
