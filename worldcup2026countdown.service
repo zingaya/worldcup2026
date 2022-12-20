@@ -1,0 +1,11 @@
+[Unit]
+Description=Woldcup 2026 countdown
+After=multi-user.target
+
+[Service]
+Type=simple
+Restart=always
+ExecStart=/usr/bin/python3 /worldcup2026/worldcup2026countdown.py
+
+[Install]
+WantedBy=multi-user.target
