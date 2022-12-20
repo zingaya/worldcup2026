@@ -50,7 +50,7 @@ jobs:
       - bash: |
           nextid=$(cat /tmp/nextid.out)
           # Install dependencies
-          pct exec $nextid -- apt-get -y update
+          pct exec $nextid -- apt-get update --allow-releaseinfo-change
           pct exec $nextid -- apt-get install -y python3-pip git
           pct exec $nextid -- pip3 install flask datetime
           
