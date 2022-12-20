@@ -29,9 +29,6 @@ jobs:
       # Run the script
       - script: |
           pct start $(nextvmid)
-        on_failure: 
-          - script: |
-              pct destroy $(nextvmid)
 
       # Run the script
       - script: |
@@ -45,10 +42,6 @@ jobs:
           
           # Make sure I have a path for executing Python
           pct exec $(nextvmid) -- export PATH=$PATH:/usr/local/bin
-        on_failure: 
-          - script: |
-              pct stop $(nextvmid)
-              pct destroy $(nextvmid)
         
       # Run the script
       - script: |
