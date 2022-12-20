@@ -20,6 +20,7 @@ jobs:
           nextid=$(echo "$list" | sort -k1,1n | tail -n1 | awk '{print $1}')
           nextid=$(($nextid +1))
           echo "##vso[task.setvariable variable=nextvmid]$nextid"
+          echo $(nextvmid)
 
   - job: create_lxc
     displayName: Create LXC in Proxmox
