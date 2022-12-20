@@ -39,7 +39,7 @@ jobs:
           pct start $(nextvmid)
         on_failure: 
           - script: |
-            pct destroy $(nextvmid)
+              pct destroy $(nextvmid)
 
   - job: prepare_lxc
     displayName: Install dependencies in the LXC
@@ -58,8 +58,8 @@ jobs:
           pct exec $(nextvmid) -- export PATH=$PATH:/usr/local/bin
         on_failure: 
           - script: |
-            pct stop $(nextvmid)
-            pct destroy $(nextvmid)
+              pct stop $(nextvmid)
+              pct destroy $(nextvmid)
         
   - job: run_worldcup2026countdown
     displayName: Run the WorldCup 2026 Countdown app
