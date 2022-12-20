@@ -20,7 +20,7 @@ jobs:
           nextid=$(echo "$list" | sort -k1,1n | tail -n1 | awk '{print $1}')
           nextid=$(($nextid +1))
           echo "##vso[task.setvariable variable=nextvmid]$nextid"
-        name: find_latest_vmid
+        on_failure: stop
 
   - job: create_lxc
     displayName: Create LXC in Proxmox
@@ -29,7 +29,7 @@ jobs:
       - script: |
           # Create the container with the next available ID
           pct create $(nextvmid) /var/lib/vz/template/cache/debian-10.0-standard_10.0-1_amd64.tar.gz --hostname=mycontainer --storage=large --net0 name=eth0,bridge=vmbr0,ip=dhcp --nameserver=8.8.8.8
-        name: create_lxc
+        on_failure: stop
 
   - job: run_lxc
     displayName: Run LXC in Proxmox
@@ -37,7 +37,9 @@ jobs:
       # Run the script
       - script: |
           pct start $(nextvmid)
-        name: run_lxc
+        on_failure: 
+          - script: |
+            pct destroy $(nextvmid)
 
   - job: prepare_lxc
     displayName: Install dependencies in the LXC
@@ -54,7 +56,10 @@ jobs:
           
           # Make sure I have a path for executing Python
           pct exec $(nextvmid) -- export PATH=$PATH:/usr/local/bin
-        name: prepare_lxc
+        on_failure: 
+          - script: |
+            pct stop $(nextvmid)
+            pct destroy $(nextvmid)
         
   - job: run_worldcup2026countdown
     displayName: Run the WorldCup 2026 Countdown app
