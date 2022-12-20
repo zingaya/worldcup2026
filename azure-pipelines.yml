@@ -9,7 +9,6 @@ pool:
 jobs:    
   - job: create_lxc
     displayName: Create LXC in Proxmox
-    dependsOn: find_latest_vmid
     steps:
       # Run the script
       - bash: |
@@ -47,10 +46,6 @@ jobs:
           # Create systemd service
           pct exec $stagingid -- cp /worldcup2026/worldcup2026countdown.service /etc/systemd/system/worldcup2026countdown.service
           systemctl daemon-reload
-          
-          # Make sure I have a path for executing Python
-          #pct exec $stagingid -- export PATH=$PATH:/usr/local/bin          
-        retryCountOnTaskFailure: 2
         
   - job: run_worldcup2026countdown
     displayName: Run the WorldCup 2026 Countdown app
