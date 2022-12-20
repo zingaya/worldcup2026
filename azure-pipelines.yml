@@ -70,6 +70,18 @@ jobs:
           nextid=$(cat /tmp/nextid.out)
           # Execute Python script
           pct exec $nextid -- nohup python3 worldcup2026/worldcup2026countdown.py &
+          
+  - job: destroy_lxc
+    dependsOn: 
+      - run_lxc
+      - prepare_lxc
+      - run_worldcup2026countdown      
+    condition: failed() # this job will only run if any of the other fails
+    steps:
+      # Run the script
+      - bash: |
+          pct stop $nextid
+          pct destroy $nextid
         
 #      # Send the pipeline status to Zabbix
 #      - script: |
