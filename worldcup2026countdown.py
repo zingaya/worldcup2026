@@ -1,25 +1,33 @@
+import json
 import time
-from datetime import datetime, timedelta
+from datetime import datetime
+from flask import Flask
 
-# Calculate the date and time of the next World Cup
-world_cup_date = datetime(2026, 6, 13)
+app = Flask(__name__)
 
-# Display the countdown
-while True:
-    # Calculate the current date and time
-    current_time = datetime.now()
-    
-    # Calculate the time remaining until the World Cup
-    time_remaining = world_cup_date - current_time
-    
-    # Split the time remaining into years, months, days, etc.
-    years, remainder = divmod(time_remaining.days, 365)
-    months, days = divmod(remainder, 30)
-    hours, minutes = divmod(time_remaining.seconds, 3600)
-    minutes, seconds = divmod(minutes, 60)
-    
-    # Display the countdown
-    print(f"Time remaining until the next World Cup: {years} years, {months} months, {days} days, {hours} hours, {minutes} minutes, {seconds} seconds")
-    
-    # Wait 1 second before updating the countdown
-    time.sleep(1)
+@app.route('/')
+def countdown():
+    # Get the current time in unix timestamp
+    now = int(time.time())
+
+    # Get the worldcup 2026 date in unix timestamp
+    worldcup_2026 = int(datetime(2026, 6, 13).timestamp())
+
+    # Calculate the remaining time in seconds
+    remaining_time = worldcup_2026 - now
+
+    # Calculate the remaining time in year, months, days, hours, minutes and seconds
+    years, remainder = divmod(remaining_time, 31556926)
+    months, remainder = divmod(remainder, 2629743)
+    days, remainder = divmod(remainder, 86400)
+    hours, remainder = divmod(remainder, 3600)
+    minutes, seconds = divmod(remainder, 60)
+
+    # Create a json with the remaining time
+    data = {'year': years, 'months': months, 'days': days, 'hours': hours, 'minutes': minutes, 'seconds': seconds, 'unix_time': remaining_time}
+
+    return json.dumps(data)
+
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=18080)
