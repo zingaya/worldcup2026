@@ -1,6 +1,6 @@
 # Define a variable to be used on later steps
 variables:
-  nextvmid: ''
+  nextvmid: 0
       
 # Configure the pipeline
 trigger: none
