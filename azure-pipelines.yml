@@ -19,7 +19,8 @@ jobs:
           # Get the last available VMid
           list=$(qm list; pct list)
           lastid=$(echo "$list" | sort -k1,1n | tail -n1 | awk '{print $1}')
-          echo "##vso[task.setvariable variable=nextvmid;]$lastid"
+          lastid=$(($lastid+1))
+          echo "##vso[task.setvariable isOutput=true variable=nextvmid]$lastid"
 
   - job: create_lxc
     displayName: Create LXC in Proxmox
