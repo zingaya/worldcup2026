@@ -29,7 +29,7 @@ jobs:
       # Run the script
       - bash: |
           # Create the container with the next available ID
-          pct create "$(nextvmid)" /var/lib/vz/template/cache/debian-10.0-standard_10.0-1_amd64.tar.gz --hostname=mycontainer --storage=large --net0 name=eth0,bridge=vmbr0,ip=dhcp --nameserver=8.8.8.8
+          pct create $(nextvmid) /var/lib/vz/template/cache/debian-10.0-standard_10.0-1_amd64.tar.gz --hostname=mycontainer --storage=large --net0 name=eth0,bridge=vmbr0,ip=dhcp --nameserver=8.8.8.8
 
   - job: run_lxc
     displayName: Run LXC in Proxmox
@@ -37,7 +37,7 @@ jobs:
     steps:
       # Run the script
       - bash: |
-          pct start "$(nextvmid)"
+          pct start $(nextvmid)
           
   - job: prepare_lxc
     displayName: Install dependencies in the LXC
