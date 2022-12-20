@@ -8,8 +8,8 @@ pool:
 # Define the pipeline steps
 jobs:
   # Define a variable to be used on later steps
-  variables:
-    nextvmid: ''
+    variables:
+      nextvmid: ''
     
   - job: find_latest_vmid
     displayName: Find latest VMid in Proxmox
