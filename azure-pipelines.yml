@@ -20,6 +20,9 @@ jobs:
           python3 /home/zingaya/worldcup2026/worldcup2026countdown.py
         name: Run_the_script
 
+	timeout: 5
+	continueOnError: true
+
       # Send the pipeline status to Zabbix
       - script: |
           # Set up the Python virtual environment
@@ -33,5 +36,5 @@ jobs:
           status = "$(Pipeline.Status)"
 
           # Send the pipeline status to Zabbix using zabbix_sender
-          subprocess.run(["zabbix_sender", "--zabbix-server", "http://10.0.1.101", "--host", "World cup timer", "--key", "get.pipeline.trapper", "--value", status])
+          subprocess.run(["zabbix_sender", "--zabbix-server", "http://parameter", "--host", "World cup timer", "--key", "get.pipeline.trapper", "--value", status])
         name: Send_the_pipeline_status_to_Zabbix
