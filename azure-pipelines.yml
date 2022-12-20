@@ -17,4 +17,4 @@ jobs:
 
           # Run the test script
           python test.py
-        name: Test-the-script
+        name: Test_the_script
