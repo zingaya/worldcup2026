@@ -41,7 +41,7 @@ jobs:
           stagingid=$(pct list | grep 'worldcup2026-staging' | awk '{print $1}')
           # Install dependencies
           pct exec $stagingid -- apt-get update --allow-releaseinfo-change
-          pct exec $stagingid -- apt-get install -y python3-pip git samba
+          pct exec $stagingid -- apt-get install -y python3-pip git
           pct exec $stagingid -- pip3 install flask datetime
           
           # Clone Git repository
