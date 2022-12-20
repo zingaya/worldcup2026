@@ -1,3 +1,7 @@
+# Define a variable to be used on later steps
+variables:
+  nextvmid: ''
+      
 # Configure the pipeline
 trigger: none
 
@@ -6,11 +10,7 @@ pool:
   name: debian
 
 # Define the pipeline steps
-jobs:
-  # Define a variable to be used on later steps
-  - variables:
-      nextvmid: ''
-    
+jobs:    
   - job: find_latest_vmid
     displayName: Find latest VMid in Proxmox
     steps:
