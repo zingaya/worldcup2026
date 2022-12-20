@@ -1,7 +1,3 @@
-# Define a variable to be used on later steps
-#variables:
-#  nextvmid: 0
-      
 # Configure the pipeline
 trigger: none
 
@@ -11,27 +7,18 @@ pool:
 
 # Define the pipeline steps
 jobs:    
-  - job: find_latest_vmid
-    displayName: Find latest VMid in Proxmox
-    steps:
-      # Run the script
-      - bash: |
-          # Get the last available VMid
-          list=$(qm list; pct list)
-          lastid=$(echo "$list" | sort -k1,1n | tail -n1 | awk '{print $1}')
-          nextid=$(($lastid+1))
-          #echo "##vso[task.setvariable isOutput=true;variable=nextvmid;]$nextid" # Somehow is not saving the variable
-          echo $nextid > /tmp/nextid.out  
-
   - job: create_lxc
     displayName: Create LXC in Proxmox
     dependsOn: find_latest_vmid
     steps:
       # Run the script
       - bash: |
-          nextid=$(cat /tmp/nextid.out)
+          list=$(qm list; pct list)
+          lastid=$(echo "$list" | sort -k1,1n | tail -n1 | awk '{print $1}')
+          nextid=$(($lastid+1))
+          
           # Create the container with the next available ID
-          pct create $nextid /var/lib/vz/template/cache/debian-10.0-standard_10.0-1_amd64.tar.gz --hostname=mycontainer --storage=large --net0 name=eth0,bridge=vmbr0,ip=dhcp --nameserver=8.8.8.8
+          pct create $nextid /var/lib/vz/template/cache/debian-10.0-standard_10.0-1_amd64.tar.gz --hostname=worldcup2026-staging --storage=large --net0 name=eth0,bridge=vmbr0,ip=dhcp --nameserver=8.8.8.8
 
   - job: run_lxc
     displayName: Run LXC in Proxmox
@@ -39,8 +26,8 @@ jobs:
     steps:
       # Run the script
       - bash: |
-          nextid=$(cat /tmp/nextid.out)
-          pct start $nextid
+          stagingid=$(pct list | grep 'worldcup2026-staging' | awk '{print $1}')
+          pct start $stagingid
           
   - job: prepare_lxc
     displayName: Install dependencies in the LXC
@@ -48,17 +35,21 @@ jobs:
     steps:
       # Run the script
       - bash: |
-          nextid=$(cat /tmp/nextid.out)
+          stagingid=$(pct list | grep 'worldcup2026-staging' | awk '{print $1}')
           # Install dependencies
-          pct exec $nextid -- apt-get update --allow-releaseinfo-change
-          pct exec $nextid -- apt-get install -y python3-pip git
-          pct exec $nextid -- pip3 install flask datetime
+          pct exec $stagingid -- apt-get update --allow-releaseinfo-change
+          pct exec $stagingid -- apt-get install -y python3-pip git
+          pct exec $stagingid -- pip3 install flask datetime
           
           # Clone Git repository
-          pct exec $nextid -- git clone https://github.com/zingaya/worldcup2026.git
+          pct exec $stagingid -- git clone https://github.com/zingaya/worldcup2026.git
+          
+          # Create systemd service
+          pct exec $stagingid -- cp /worldcup2026/worldcup2026countdown.service /etc/systemd/system/worldcup2026countdown.service
+          systemctl daemon-reload
           
           # Make sure I have a path for executing Python
-          #pct exec $nextid -- export PATH=$PATH:/usr/local/bin          
+          #pct exec $stagingid -- export PATH=$PATH:/usr/local/bin          
         retryCountOnTaskFailure: 2
         
   - job: run_worldcup2026countdown
@@ -67,9 +58,22 @@ jobs:
     steps:
       # Run the script
       - bash: |
-          nextid=$(cat /tmp/nextid.out)
+          stagingid=$(pct list | grep 'worldcup2026-staging' | awk '{print $1}')
           # Execute Python script
-          pct exec $nextid -- nohup python3 worldcup2026/worldcup2026countdown.py &
+          pct exec $stagingid -- systemctl start worldcup2026countdown.service
+          
+  - job: swap_staging
+    displayName: Swap Staging - Production LXC
+    dependsOn: run_worldcup2026countdown
+    steps:
+      # Run the script
+      - bash: |
+          prodid=$(pct list | grep 'worldcup2026' | awk '{print $1}')
+          stagingid=$(pct list | grep 'worldcup2026-staging' | awk '{print $1}')
+          pct set $prodid --hostname worldcup2026-replaced
+          pct set $stagingid --hostname worldcup2026        
+          pct stop $prodid
+          pct destroy $prodid
           
   - job: destroy_lxc
     displayName: Destroy LXC in case that something failed
@@ -81,8 +85,9 @@ jobs:
     steps:
       # Run the script
       - bash: |
-          pct stop $nextid
-          pct destroy $nextid
+          stagingid=$(pct list | grep 'worldcup2026-staging' | awk '{print $1}')
+          pct stop $stagingid
+          pct destroy $stagingid
         
   - job: pipeline_status_to_zabbix
     displayName: Send the pipeline status to Zabbix
