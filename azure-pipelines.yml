@@ -10,7 +10,7 @@ pool:
 
 # Define the pipeline steps
 jobs:
-  - job: find-latest-vmid
+  - job: find_latest_vmid
     displayName: Find latest VMid in Proxmox
     steps:
       # Run the script
@@ -20,26 +20,26 @@ jobs:
           nextid=$(echo "$list" | sort -k1,1n | tail -n1 | awk '{print $1}')
           nextid=$(($nextid +1))
           echo "##vso[task.setvariable variable=nextvmid]$nextid"
-        name: findlatestvmid
+        name: find_latest_vmid
 
-  - job: create-lxc
+  - job: create_lxc
     displayName: Create LXC in Proxmox
     steps:
       # Run the script
       - script: |
           # Create the container with the next available ID
           pct create $(nextvmid) /var/lib/vz/template/cache/debian-10.0-standard_10.0-1_amd64.tar.gz --hostname=mycontainer --storage=large --net0 name=eth0,bridge=vmbr0,ip=dhcp --nameserver=8.8.8.8
-        name: createlxc
+        name: create_lxc
 
-  - job: run-lxc
+  - job: run_lxc
     displayName: Run LXC in Proxmox
     steps:
       # Run the script
       - script: |
           pct start $(nextvmid)
-        name: runlxc
+        name: run_lxc
 
-  - job: prepare-lxc
+  - job: prepare_lxc
     displayName: Install dependencies in the LXC
     steps:
       # Run the script
@@ -54,16 +54,15 @@ jobs:
           
           # Make sure I have a path for executing Python
           pct exec $(nextvmid) -- export PATH=$PATH:/usr/local/bin
-        name: preparelxc
+        name: prepare_lxc
         
-  - job: run-worldcup2026countdown
+  - job: run_worldcup2026countdown
     displayName: Run the WorldCup 2026 Countdown app
     steps:
       # Run the script
       - script: |
           # Execute Python script
           pct exec $(nextvmid) -- nohup python3 worldcup2026/worldcup2026countdown.py &
-        name: runworldcup2026countdown
         
 #      # Send the pipeline status to Zabbix
 #      - script: |
