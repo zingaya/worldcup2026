@@ -1,0 +1,54 @@
+# YAML pipeline to build, test, and deploy a Python script to Azure
+
+# Trigger the pipeline on push to the master branch
+trigger:
+  branches:
+    include:
+      - master
+
+# Use the latest version of the Azure Pipelines Python image
+resources:
+  containers:
+    - container: python
+      image: python:latest
+
+# Set up a job to build and test the Python script
+jobs:
+  - job: build_and_test
+    steps:
+      # Install any required packages from requirements.txt
+      - task: PythonScript@0
+        inputs:
+          scriptPath: requirements.txt
+          arguments: install -r requirements.txt
+
+      # Run the unit tests
+      - task: PythonScript@0
+        inputs:
+          scriptPath: tests/test_worldcup2026countdown.py
+
+      # Build the Python script
+      - task: PythonScript@0
+        inputs:
+          scriptPath: build.py
+          arguments: worldcup2026countdown.py
+
+# Set up a job to deploy the Python script to Azure
+  - job: deploy
+    dependsOn: build_and_test
+    steps:
+      # Authenticate with Azure
+      - task: AzureCLI@2
+        inputs:
+          azureSubscription: 'My Azure Subscription'
+          scriptType: 'ps'
+          scriptLocation: 'inlineScript'
+          inlineScript: |
+            az login
+            az account set --subscription "My Azure Subscription"
+      
+      # Deploy the Python script to Azure
+      - task: PythonScript@0
+        inputs:
+          scriptPath: deploy.py
+          arguments: worldcup2026countdown.py
