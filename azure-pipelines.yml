@@ -13,17 +13,17 @@ jobs:
       # Test the script
       - script: |
           # Set up the Python virtual environment
-          python -m venv env
+          python3 -m venv env
           source env/bin/activate
 
           # Run the test script
-          python test.py
+          /home/zingaya/worldcup2026/worldcup2026countdown.py
         name: Test_the_script
 
       # Send the pipeline status to Zabbix
       - script: |
           # Set up the Python virtual environment
-          python -m venv env
+          python3 -m venv env
           source env/bin/activate
 
           # Import the required modules
