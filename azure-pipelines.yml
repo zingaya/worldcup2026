@@ -58,7 +58,7 @@ jobs:
           pct exec $nextid -- git clone https://github.com/zingaya/worldcup2026.git
           
           # Make sure I have a path for executing Python
-          pct exec $nextid -- export PATH=$PATH:/usr/local/bin          
+          #pct exec $nextid -- export PATH=$PATH:/usr/local/bin          
         retryCountOnTaskFailure: 2
         
   - job: run_worldcup2026countdown
