@@ -10,6 +10,7 @@ jobs:
   - job: test
     displayName: Test the World Cup countdown script
     steps:
+      # Test the script
       - script: |
           # Set up the Python virtual environment
           python -m venv env
@@ -18,3 +19,19 @@ jobs:
           # Run the test script
           python test.py
         name: Test_the_script
+
+      # Send the pipeline status to Zabbix
+      - script: |
+          # Set up the Python virtual environment
+          python -m venv env
+          source env/bin/activate
+
+          # Import the required modules
+          import subprocess
+
+          # Get the pipeline status
+          status = "$(Pipeline.Status)"
+
+          # Send the pipeline status to Zabbix using zabbix_sender
+          subprocess.run(["zabbix_sender", "--zabbix-server", "http://10.0.1.101", "--host", "World cup timer", "--key", "get.pipeline.trapper", "--value", status])
+        name: Send_the_pipeline_status_to_Zabbix
