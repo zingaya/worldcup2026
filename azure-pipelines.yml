@@ -19,8 +19,8 @@ jobs:
           list=$(qm list; pct list)
           nextid=$(echo "$list" | sort -k1,1n | tail -n1 | awk '{print $1}')
           nextid=$(($nextid +1))
-	  echo "##vso[task.setvariable variable=nextvmid]$nextid"
-	  
+          echo "##vso[task.setvariable variable=nextvmid]$nextid"
+
   - job: create-lxc
     displayName: Create LXC in Proxmox
     steps:
@@ -28,14 +28,14 @@ jobs:
       - script: |
           # Create the container with the next available ID
           pct create $(nextvmid) /var/lib/vz/template/cache/debian-10.0-standard_10.0-1_amd64.tar.gz --hostname=mycontainer --storage=large --net0 name=eth0,bridge=vmbr0,ip=dhcp --nameserver=8.8.8.8
-  
+
   - job: run-lxc
     displayName: Run LXC in Proxmox
     steps:
       # Run the script
       - script: |          
           pct start $(nextvmid)
-	  
+
   - job: prepare-lxc
     displayName: Install dependencies in the LXC
     steps:
@@ -51,7 +51,7 @@ jobs:
           
           # Make sure I have a path for executing Python
           pct exec $(nextvmid) -- export PATH=$PATH:/usr/local/bin
-	  
+
   - job: run-worldcup2026countdown
     displayName: Run the WorldCup 2026 Countdown app
     steps:
