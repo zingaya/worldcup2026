@@ -1,3 +1,7 @@
+# Get variables
+variables:
+- group: Send-parameters
+
 # Configure the pipeline
 trigger: none
 
