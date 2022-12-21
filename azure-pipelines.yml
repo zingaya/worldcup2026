@@ -3,7 +3,8 @@ variables:
 - group: Send-parameters
 
 # Configure the pipeline
-trigger: none
+trigger: 
+  - main    
 
 # Specify the agent pool
 pool:
