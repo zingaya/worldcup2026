@@ -100,9 +100,9 @@ jobs:
     displayName: Trigger main pipeline
     condition: always()
     steps:
-  - task: AzurePipelinesTrigger@1
-    inputs:
-    triggerType: 'completed'
-    pipeline: 'zabbix-azure-pipeline'
-    condition: 'succeededOrFailed'
+      - task: AzurePipelinesTrigger@1
+        inputs:
+        triggerType: 'completed'
+        pipeline: 'zabbix-azure-pipeline'
+        condition: 'succeededOrFailed'
       
