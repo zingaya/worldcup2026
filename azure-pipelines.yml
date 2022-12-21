@@ -5,7 +5,7 @@ variables:
 - group: Send-parameters
 
 # Configure the pipeline
-trigger: zabbix-azure-pipeline
+trigger: none
 
 # Specify the agent pool
 pool:
