@@ -7,7 +7,7 @@ variables:
 trigger:
   branches:
     include:
-      - master
+      - main
   paths:
     include:
       - worldcup2026countdown.py
@@ -28,9 +28,10 @@ jobs:
           lastid=$(echo "$list" | sort -k1,1n | tail -n1 | awk '{print $1}')
           nextid=$(($lastid+1))
           
-          # Create the container with the next available ID
+          # Create the container using the next available VMid
           pct create $nextid /var/lib/vz/template/cache/debian-10.0-standard_10.0-1_amd64.tar.gz --hostname=worldcup2026-staging --searchdomain localdomain --storage=large --net0 name=eth0,bridge=vmbr0,ip=dhcp --nameserver=8.8.8.8
-
+          
+          # Need to create conditions to acknowledge the succesful creation of the LXC
   - job: run_lxc
     displayName: Run LXC in Proxmox
     dependsOn: create_lxc
@@ -40,6 +41,7 @@ jobs:
           stagingid=$(pct list | grep 'worldcup2026-staging' | awk '{print $1}')
           pct start $stagingid
           
+          # Need to create conditions to acknowledge the succesful start of the LXC
   - job: prepare_lxc
     displayName: Install dependencies in the LXC
     dependsOn: run_lxc
@@ -58,7 +60,8 @@ jobs:
           # Create systemd service
           pct exec $stagingid -- cp /worldcup2026/worldcup2026countdown.service /etc/systemd/system/worldcup2026countdown.service
           systemctl daemon-reload
-        
+          
+          # Need to create conditions to acknowledge that the LXC is ready to run the website
   - job: run_worldcup2026countdown
     displayName: Run the WorldCup 2026 Countdown app
     dependsOn: prepare_lxc
@@ -69,6 +72,7 @@ jobs:
           # Execute Python script
           pct exec $stagingid -- systemctl start worldcup2026countdown.service
           
+          # Need to create conditions to acknowledge that the website is running          
   - job: swap_staging
     displayName: Swap Staging - Production LXC
     dependsOn: run_worldcup2026countdown
@@ -93,7 +97,7 @@ jobs:
       - prepare_lxc
       - run_worldcup2026countdown   
       - swap_staging
-    condition: failed() # this job will only run if any of the other fails
+    condition: failed() # this job will only run if any other fails
     steps:
       # Run the script
       - bash: |
