@@ -4,9 +4,6 @@ name: deploy_worldcup2026countdown
 variables:
 - group: Send-parameters
 
-# Configure the pipeline
-trigger: none
-
 # Specify the agent pool
 pool:
   name: debian
