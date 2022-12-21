@@ -95,4 +95,11 @@ jobs:
           stagingid=$(pct list | grep 'worldcup2026-staging' | awk '{print $1}')
           pct stop $stagingid
           pct destroy $stagingid
+          
+  - task: AzurePipelineTrigger@2
+  condition: always()
+  inputs:
+    PipelineName: 'zabbix-azure-pipeline'
+    Source: 'Current'
+
       
