@@ -96,14 +96,13 @@ jobs:
           pct stop $stagingid
           pct destroy $stagingid
           
-  - job: AzurePipelineTrigger@2
-    displayName: Trigger pipeline to send status to Zabbix
-    dependsOn:
-      - swap_staging
-      - destroy_lxc
+  - job: trigger_main_pipeline
+    displayName: Trigger main pipeline
     condition: always()
+    steps:
+  - task: AzurePipelinesTrigger@1
     inputs:
-      PipelineName: 'zabbix-azure-pipeline'
-      Source: 'Current'
-
+    triggerType: 'completed'
+    pipeline: 'zabbix-azure-pipeline'
+    condition: 'succeededOrFailed'
       
