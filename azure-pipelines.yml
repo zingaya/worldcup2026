@@ -4,7 +4,14 @@ name: deploy_worldcup2026countdown
 variables:
 - group: Send-parameters
 
-trigger: none
+trigger:
+  branches:
+    include:
+      - master
+  paths:
+    include:
+      - worldcup2026countdown.py
+      - worldcup2026countdown.service
 
 # Specify the agent pool
 pool:
