@@ -1,3 +1,5 @@
+name: deploy_worldcup2026countdown
+
 # Get variables
 variables:
 - group: Send-parameters
