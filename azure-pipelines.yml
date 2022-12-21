@@ -1,0 +1,95 @@
+# Get variables
+variables:
+- group: Send-parameters
+
+# Configure the pipeline
+trigger: none
+
+# Specify the agent pool
+pool:
+  name: debian
+
+# Define the pipeline steps
+jobs:    
+  - job: create_lxc
+    displayName: Create LXC in Proxmox
+    steps:
+      # Run the script
+      - bash: |
+          list=$(qm list; pct list)
+          lastid=$(echo "$list" | sort -k1,1n | tail -n1 | awk '{print $1}')
+          nextid=$(($lastid+1))
+          
+          # Create the container with the next available ID
+          pct create $nextid /var/lib/vz/template/cache/debian-10.0-standard_10.0-1_amd64.tar.gz --hostname=worldcup2026-staging --searchdomain localdomain --storage=large --net0 name=eth0,bridge=vmbr0,ip=dhcp --nameserver=8.8.8.8
+
+  - job: run_lxc
+    displayName: Run LXC in Proxmox
+    dependsOn: create_lxc
+    steps:
+      # Run the script
+      - bash: |
+          stagingid=$(pct list | grep 'worldcup2026-staging' | awk '{print $1}')
+          pct start $stagingid
+          
+  - job: prepare_lxc
+    displayName: Install dependencies in the LXC
+    dependsOn: run_lxc
+    steps:
+      # Run the script
+      - bash: |
+          stagingid=$(pct list | grep 'worldcup2026-staging' | awk '{print $1}')
+          # Install dependencies
+          pct exec $stagingid -- apt-get update --allow-releaseinfo-change
+          pct exec $stagingid -- apt-get install -y python3-pip git
+          pct exec $stagingid -- pip3 install flask datetime
+          
+          # Clone Git repository
+          pct exec $stagingid -- git clone https://github.com/zingaya/worldcup2026.git
+          
+          # Create systemd service
+          pct exec $stagingid -- cp /worldcup2026/worldcup2026countdown.service /etc/systemd/system/worldcup2026countdown.service
+          systemctl daemon-reload
+        
+  - job: run_worldcup2026countdown
+    displayName: Run the WorldCup 2026 Countdown app
+    dependsOn: prepare_lxc
+    steps:
+      # Run the script
+      - bash: |
+          stagingid=$(pct list | grep 'worldcup2026-staging' | awk '{print $1}')
+          # Execute Python script
+          pct exec $stagingid -- systemctl start worldcup2026countdown.service
+          
+  - job: swap_staging
+    displayName: Swap Staging - Production LXC
+    dependsOn: run_worldcup2026countdown
+    steps:
+      # Run the script
+      - bash: |
+          prodid=$(pct list | grep 'worldcup2026' | grep -v 'staging' | awk '{print $1}')
+          stagingid=$(pct list | grep 'worldcup2026-staging' | awk '{print $1}')
+          pct set $prodid --hostname=worldcup2026-replaced
+          pct set $stagingid --hostname=worldcup2026     
+          pct stop $prodid
+          pct destroy $prodid
+          pct set $stagingid --net0 name=eth0,bridge=vmbr0,ip=$(privateip)/24,gw=$(gateway)
+          
+          # You need to restart the service as it is still binded to DHCP IP.
+          pct exec $stagingid -- systemctl restart worldcup2026countdown.service
+          
+  - job: destroy_lxc
+    displayName: Destroy LXC in case that something failed
+    dependsOn: 
+      - run_lxc
+      - prepare_lxc
+      - run_worldcup2026countdown   
+      - swap_staging
+    condition: failed() # this job will only run if any of the other fails
+    steps:
+      # Run the script
+      - bash: |
+          stagingid=$(pct list | grep 'worldcup2026-staging' | awk '{print $1}')
+          pct stop $stagingid
+          pct destroy $stagingid
+      
