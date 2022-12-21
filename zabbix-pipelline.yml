@@ -1,5 +1,13 @@
 name: zabbix-azure-pipeline
 
+trigger:
+  branches:
+    include:
+      - master
+  paths:
+    include:
+      - azure-pipelines.yml
+
 # Get variables
 variables:
 - group: Send-parameters
