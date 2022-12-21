@@ -4,10 +4,7 @@ name: deploy_worldcup2026countdown
 variables:
 - group: Send-parameters
 
-trigger:
-  branches:
-    include:
-      - main
+trigger: none
 
 # Specify the agent pool
 pool:
