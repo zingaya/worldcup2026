@@ -24,7 +24,7 @@ def countdown():
     minutes, seconds = divmod(remainder, 60)
 
     # Create a json with the remaining time
-    data = {'year': years, 'months': months, 'days': days, 'hours': hours, 'minutes': minutes, 'seconds': seconds, 'unix_time': remaining_time, 'app_ver': '1.0'}
+    data = {'year': years, 'months': months, 'days': days, 'hours': hours, 'minutes': minutes, 'seconds': seconds, 'unix_time': remaining_time, 'app_ver': '1.0.1'}
 
     return json.dumps(data)
 
