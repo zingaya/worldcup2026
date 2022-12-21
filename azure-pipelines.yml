@@ -75,6 +75,9 @@ jobs:
           pct destroy $prodid
           pct set $stagingid --net0 name=eth0,bridge=vmbr0,ip=$(privateip)/24,gw=$(gateway)
           
+          # You need to restart the service as it is still binded to DHCP IP.
+          pct exec $stagingid -- systemctl restart worldcup2026countdown.service
+          
   - job: destroy_lxc
     displayName: Destroy LXC in case that something failed
     dependsOn: 
