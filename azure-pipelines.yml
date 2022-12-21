@@ -96,10 +96,14 @@ jobs:
           pct stop $stagingid
           pct destroy $stagingid
           
-  - task: AzurePipelineTrigger@2
-  condition: always()
-  inputs:
-    PipelineName: 'zabbix-azure-pipeline'
-    Source: 'Current'
+  - job: AzurePipelineTrigger@2
+    displayName: Trigger pipeline to send status to Zabbix
+    dependsOn:
+      - swap_staging
+      - destroy_lxc
+    condition: always()
+    inputs:
+      PipelineName: 'zabbix-azure-pipeline'
+      Source: 'Current'
 
       
