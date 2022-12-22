@@ -11,7 +11,6 @@ With this idea in mind, I created this project that uses:
 - Containerization (LXC with Proxmox)
 - Bash
 - Azure API
-
 - Github repositories
 
 There is no goal in this project, just combine those and make them work thogether.\
