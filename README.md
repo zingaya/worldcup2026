@@ -14,7 +14,8 @@ With this idea in mind, I created this project that uses:
 - Azure API
 - Github repositories
 
-There is no goal in this project, just combine those items and make them work thogether.\
+They are just an example how is possible to combine all these and make them to work together.\
+There is no real goal, and of course I just made things complicated on purpose.\
 I did not test all scenarios, and many conditions to catch errors are missing.
 
 In the other hand, I am also somewhat limited due to my home server capacity, and my free time available to deploy a whole new subnet with a separate firewall and router, to automate IP tables, portforwaring rules, load balancer, and even use a DNS.
